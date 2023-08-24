@@ -407,6 +407,8 @@ class deepFeatureExtractor_EfficientNet(nn.Module):
             self.dimList = [32, 40, 72, 200, 2304] #5th feature is extracted after conv_head or bn2
             #self.dimList = [32, 40, 72, 200, 576] #5th feature is extracted after blocks[6]
         elif architecture == "EfficientNet-B7":
+            import ssl
+            ssl._create_default_https_context = ssl._create_unverified_context
             self.encoder = geffnet.tf_efficientnet_b7_ns(pretrained=True)
             self.dimList = [32, 48, 80, 224, 2560] #5th feature is extracted after conv_head or bn2
             #self.dimList = [32, 48, 80, 224, 640] #5th feature is extracted after blocks[6]

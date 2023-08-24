@@ -21,8 +21,10 @@ import os.path as ops
 def config(args):
     args.model_name = 'PersFormer'
     args.dataset_name = 'apollo'
-    args.dataset_dir = '/mnt/disk01/apollo/'
-    args.data_dir = '/mnt/disk01/apollo/'
+    # args.dataset_dir = '/mnt/disk01/apollo/'
+    # args.data_dir = '/mnt/disk01/apollo/'
+    args.dataset_dir = '/home/houzm/datasets/apollo-3d-lane-synthetic/Apollo_Sim_3D_Lane_Release/'
+    args.data_dir = '/home/houzm/datasets/apollo-3d-lane-synthetic/3D_Lane_Synthetic_Dataset-master/data_splits/standard/'
 
     if 'openlane' in args.dataset_name:
         openlane_config(args)

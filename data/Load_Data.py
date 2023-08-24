@@ -837,7 +837,7 @@ class LaneDataset(Dataset):
         extrinsics = torch.from_numpy(extrinsics)
 
         # prepare binary segmentation label map
-        seg_label = np.zeros((self.h_net, self.w_net), dtype=np.int8)
+        seg_label = np.zeros((self.h_net, self.w_net), dtype=np.uint8)
         gt_lanes = _label_laneline_org
         gt_laneline_img = [0] * len(gt_lanes)
         for i, lane in enumerate(gt_lanes):

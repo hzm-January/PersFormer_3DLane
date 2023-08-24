@@ -26,9 +26,9 @@ def main():
     args = parser.parse_args()
 
     # specify dataset and model config
-    # persformer_apollo.config(args)
+    persformer_apollo.config(args)
     # persformer_once.config(args)
-    persformer_openlane.config(args)
+    # persformer_openlane.config(args)
     # initialize distributed data parallel set
     ddp_init(args)
     # define runner to begin training or evaluation
@@ -40,5 +40,5 @@ def main():
         runner.eval()
 
 if __name__ == '__main__':
-    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "4,5,6,7"
     main()
