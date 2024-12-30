@@ -146,3 +146,5 @@ test.png
 models/ops/build
 models/ops/dist
 *.egg-info
+.idea
+distributed
