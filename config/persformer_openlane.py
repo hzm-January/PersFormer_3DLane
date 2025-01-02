@@ -27,19 +27,25 @@ def config(args):
 
     # 1000 sequence
     args.dataset_name = 'openlane'
-    args.dataset_dir = '/mnt/disk01/openlane/images/'
-    args.data_dir = '/mnt/disk01/openlane/lane3d_1000/'
+    # args.dataset_dir = '/mnt/disk01/openlane/images/'
+    # args.data_dir = '/mnt/disk01/openlane/lane3d_1000/'
+
+    args.dataset_dir = '/root/autodl-tmp/dataset/openlane/images'
+    # args.data_dir = '/root/autodl-tmp/dataset/openlane/lane3d_1000/'
+    args.data_dir = '/root/autodl-tmp/dataset/openlane/lane3d_300/'
 
     if 'openlane' in args.dataset_name:
         openlane_config(args)
     else:
         sim3d_config(args)
 
-    args.save_prefix = ops.join(os.getcwd(), 'data_splits')
+    # args.save_prefix = ops.join(os.getcwd(), 'data_splits')
+    args.save_prefix = '/root/autodl-tmp/output/persformer'
     args.save_path = ops.join(args.save_prefix, args.dataset_name)
 
     # for the case only running evaluation
-    args.evaluate = False
+    # args.evaluate = False
+    args.evaluate = True
     args.evaluate_case = False
 
     # settings for save and visualize
@@ -48,6 +54,7 @@ def config(args):
 
     # data loader
     args.nworkers = 4
+    args.local_rank=0
 
     # run the training
     # args.mod = 'debug'
@@ -56,6 +63,7 @@ def config(args):
     # Define the network model
     # change encoder, "EfficientNet-B7"
     args.encoder = "EfficientNet-B7"
+    # args.encoder = "ResNet50"
 
     # init
     # args.weight_init = 'xavier'
