@@ -44,8 +44,8 @@ def config(args):
     args.save_path = ops.join(args.save_prefix, args.dataset_name)
 
     # for the case only running evaluation
-    # args.evaluate = False
-    args.evaluate = True
+    args.evaluate = False
+    # args.evaluate = True
     args.evaluate_case = False
 
     # settings for save and visualize

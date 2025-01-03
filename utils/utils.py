@@ -61,8 +61,10 @@ def define_args():
     parser.add_argument("--pred_cam", type=str2bool, nargs='?', const=True, default=False, help="use network to predict camera online?")
     parser.add_argument('--ipm_h', type=int, default=208, help='height of inverse projective map (IPM)')
     parser.add_argument('--ipm_w', type=int, default=128, help='width of inverse projective map (IPM)')
-    parser.add_argument('--resize_h', type=int, default=360, help='height of the resized image (input of net)')
-    parser.add_argument('--resize_w', type=int, default=480, help='width of the resized image (input of net)')
+    # parser.add_argument('--resize_h', type=int, default=360, help='height of the resized image (input of net)')
+    # parser.add_argument('--resize_w', type=int, default=480, help='width of the resized image (input of net)')
+    parser.add_argument('--resize_h', type=int, default=720, help='height of the resized image (input of net)')
+    parser.add_argument('--resize_w', type=int, default=960, help='width of the resized image (input of net)')
     parser.add_argument('--y_ref', type=float, default=20.0, help='the reference Y distance in meters from where lane association is determined')
     parser.add_argument('--prob_th', type=float, default=0.5, help='probability threshold for selecting output lanes')
     parser.add_argument('--encoder', type=str, default='ResNext101', help='feature extractor:'

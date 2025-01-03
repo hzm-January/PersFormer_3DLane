@@ -389,16 +389,16 @@ class Runner:
                     laneatt_proposals_list, output_net, pred_hcam, pred_pitch, pred_seg_bev_map, uncertainty_loss = model(input=input, _M_inv=M_inv)
 
                     # compute FPS
-                    # iterations = 1000
-                    # torch.cuda.synchronize()
-                    # start = time.time()
-                    # for _ in range(iterations):
-                    #     laneatt_proposals_list, output_net, pred_hcam, pred_pitch, pred_seg_bev_map, uncertainty_loss = model(input=input, _M_inv=M_inv)
-                    # torch.cuda.synchronize()
-                    # end = time.time()
-                    # FPS = input.shape[0] * iterations / (end - start)
-                    # print("FPS: ", FPS)
-                    # break
+                    iterations = 1000
+                    torch.cuda.synchronize()
+                    start = time.time()
+                    for _ in range(iterations):
+                        laneatt_proposals_list, output_net, pred_hcam, pred_pitch, pred_seg_bev_map, uncertainty_loss = model(input=input, _M_inv=M_inv)
+                    torch.cuda.synchronize()
+                    end = time.time()
+                    FPS = input.shape[0] * iterations / (end - start)
+                    print("FPS: ", FPS)
+                    break
 
                     # 3D loss
                     loss_3d, loss_3d_dict = criterion(output_net, gt, pred_hcam, gt_hcam, pred_pitch, gt_pitch)
