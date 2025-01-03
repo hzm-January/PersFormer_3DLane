@@ -203,6 +203,10 @@ class PersFormer(nn.Module):
             return deepFeatureExtractor_MobileNetV2(lv6=False)
         elif args.encoder == 'ResNet101':
             return deepFeatureExtractor_ResNet101(lv6=False)
+        elif args.encoder == 'ResNet50':
+            return deepFeatureExtractor_ResNet50(lv6=False)
+        elif args.encoder == 'ResNet18':
+            return deepFeatureExtractor_ResNet18(lv6=False)
         elif 'EfficientNet' in args.encoder:
             return deepFeatureExtractor_EfficientNet(args.encoder, lv6=False, lv5=False, lv4=False, lv3=False)
         else:

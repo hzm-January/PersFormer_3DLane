@@ -40,7 +40,8 @@ def config(args):
         sim3d_config(args)
 
     # args.save_prefix = ops.join(os.getcwd(), 'data_splits')
-    args.save_prefix = '/root/autodl-tmp/output/persformer'
+    # args.save_prefix = '/root/autodl-tmp/output/persformer/resnet50'
+    args.save_prefix = '/root/autodl-tmp/output/persformer/resnet18'
     args.save_path = ops.join(args.save_prefix, args.dataset_name)
 
     # for the case only running evaluation
@@ -62,8 +63,9 @@ def config(args):
 
     # Define the network model
     # change encoder, "EfficientNet-B7"
-    args.encoder = "EfficientNet-B7"
+    # args.encoder = "EfficientNet-B7"
     # args.encoder = "ResNet50"
+    args.encoder = "ResNet18"
 
     # init
     # args.weight_init = 'xavier'

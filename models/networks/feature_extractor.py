@@ -372,6 +372,100 @@ class deepFeatureExtractor_ResNet101(nn.Module):
                 module.weight.requires_grad = enable
                 module.bias.requires_grad = enable
 
+
+class deepFeatureExtractor_ResNet50(nn.Module):
+    def __init__(self, lv6=False):
+        super(deepFeatureExtractor_ResNet50, self).__init__()
+        # after passing ReLU   : H/2  x W/2
+        # after passing Layer1 : H/4  x W/4
+        # after passing Layer2 : H/8  x W/8
+        # after passing Layer3 : H/16 x W/16
+        self.encoder = models.resnet101(pretrained=True)
+        self.fixList = ['layer1.0', 'layer1.1', '.bn']
+
+        if lv6 is True:
+            self.layerList = ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
+            self.dimList = [64, 256, 512, 1024, 2048]
+        else:
+            del self.encoder.layer4
+            del self.encoder.fc
+            self.layerList = ['relu', 'layer1', 'layer2', 'layer3']
+            self.dimList = [64, 256, 512, 1024]
+
+        for name, parameters in self.encoder.named_parameters():
+            if name == 'conv1.weight':
+                parameters.requires_grad = False
+            if any(x in name for x in self.fixList):
+                parameters.requires_grad = False
+
+    def forward(self, x):
+        out_featList = []
+        feature = x
+        for k, v in self.encoder._modules.items():
+            if k == 'avgpool':
+                break
+            feature = v(feature)
+            # feature = v(features[-1])
+            # features.append(feature)
+            if any(x in k for x in self.layerList):
+                out_featList.append(feature)
+        return out_featList
+
+    def freeze_bn(self, enable=False):
+        """ Adapted from https://discuss.pytorch.org/t/how-to-train-with-frozen-batchnorm/12106/8 """
+        for module in self.modules():
+            if isinstance(module, nn.BatchNorm2d):
+                module.train() if enable else module.eval()
+                module.weight.requires_grad = enable
+                module.bias.requires_grad = enable
+
+
+class deepFeatureExtractor_ResNet18(nn.Module):
+    def __init__(self, lv6=False):
+        super(deepFeatureExtractor_ResNet18, self).__init__()
+        # after passing ReLU   : H/2  x W/2
+        # after passing Layer1 : H/4  x W/4
+        # after passing Layer2 : H/8  x W/8
+        # after passing Layer3 : H/16 x W/16
+        self.encoder = models.resnet101(pretrained=True)
+        self.fixList = ['layer1.0', 'layer1.1', '.bn']
+
+        if lv6 is True:
+            self.layerList = ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
+            self.dimList = [64, 256, 512, 1024, 2048]
+        else:
+            del self.encoder.layer4
+            del self.encoder.fc
+            self.layerList = ['relu', 'layer1', 'layer2', 'layer3']
+            self.dimList = [64, 256, 512, 1024]
+
+        for name, parameters in self.encoder.named_parameters():
+            if name == 'conv1.weight':
+                parameters.requires_grad = False
+            if any(x in name for x in self.fixList):
+                parameters.requires_grad = False
+
+    def forward(self, x):
+        out_featList = []
+        feature = x
+        for k, v in self.encoder._modules.items():
+            if k == 'avgpool':
+                break
+            feature = v(feature)
+            # feature = v(features[-1])
+            # features.append(feature)
+            if any(x in k for x in self.layerList):
+                out_featList.append(feature)
+        return out_featList
+
+    def freeze_bn(self, enable=False):
+        """ Adapted from https://discuss.pytorch.org/t/how-to-train-with-frozen-batchnorm/12106/8 """
+        for module in self.modules():
+            if isinstance(module, nn.BatchNorm2d):
+                module.train() if enable else module.eval()
+                module.weight.requires_grad = enable
+                module.bias.requires_grad = enable
+
 class deepFeatureExtractor_EfficientNet(nn.Module):
     def __init__(self, architecture="EfficientNet-B5", lv6=False, lv5=False, lv4=False, lv3=False):
         super(deepFeatureExtractor_EfficientNet, self).__init__()
