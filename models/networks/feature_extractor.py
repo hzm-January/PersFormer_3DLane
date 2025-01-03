@@ -380,7 +380,7 @@ class deepFeatureExtractor_ResNet50(nn.Module):
         # after passing Layer1 : H/4  x W/4
         # after passing Layer2 : H/8  x W/8
         # after passing Layer3 : H/16 x W/16
-        self.encoder = models.resnet101(pretrained=True)
+        self.encoder = models.resnet50(pretrained=True)
         self.fixList = ['layer1.0', 'layer1.1', '.bn']
 
         if lv6 is True:
@@ -427,7 +427,7 @@ class deepFeatureExtractor_ResNet18(nn.Module):
         # after passing Layer1 : H/4  x W/4
         # after passing Layer2 : H/8  x W/8
         # after passing Layer3 : H/16 x W/16
-        self.encoder = models.resnet101(pretrained=True)
+        self.encoder = models.resnet18(pretrained=True)
         self.fixList = ['layer1.0', 'layer1.1', '.bn']
 
         if lv6 is True:

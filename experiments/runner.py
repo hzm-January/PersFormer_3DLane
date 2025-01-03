@@ -398,7 +398,8 @@ class Runner:
                     end = time.time()
                     FPS = input.shape[0] * iterations / (end - start)
                     print("FPS: ", FPS)
-                    break
+                    # break
+                    return
 
                     # 3D loss
                     loss_3d, loss_3d_dict = criterion(output_net, gt, pred_hcam, gt_hcam, pred_pitch, gt_pitch)
@@ -643,7 +644,9 @@ class Runner:
                 model1 = model1.to(device)
                 model2 = model2.to(device)
         
-        best_file_name = glob.glob(os.path.join(args.save_path, 'model_best*'))[0]
+        # best_file_name = glob.glob(os.path.join(args.save_path, 'model_best*'))[0]
+        # best_file_name = glob.glob(os.path.join(args.save_path, 'persformer_resnet50_720x960_model_best_epoch_3.pth.tar'))[0]
+        best_file_name = glob.glob(os.path.join(args.save_path, args.test_model))[0]
         if os.path.isfile(best_file_name):
             checkpoint = torch.load(best_file_name)
             if args.proc_id == 0:
