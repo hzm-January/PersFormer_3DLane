@@ -29,10 +29,12 @@ from torch.optim import lr_scheduler
 import os.path as ops
 from nms import nms
 from mpl_toolkits.mplot3d import Axes3D
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.special import softmax
+
 plt.rcParams['figure.figsize'] = (35, 30)
 
 
@@ -56,60 +58,77 @@ def define_args():
     parser.add_argument('--num_category', type=int, default=2, help='number of lane category, including background')
     # PersFormer settings
     parser.add_argument('--mod', type=str, default='PersFormer', help='model to train')
-    parser.add_argument("--pretrained", type=str2bool, nargs='?', const=True, default=True, help="use pretrained model to start training")
+    parser.add_argument("--pretrained", type=str2bool, nargs='?', const=True, default=True,
+                        help="use pretrained model to start training")
     parser.add_argument("--batch_norm", type=str2bool, nargs='?', const=True, default=True, help="apply batch norm")
-    parser.add_argument("--pred_cam", type=str2bool, nargs='?', const=True, default=False, help="use network to predict camera online?")
+    parser.add_argument("--pred_cam", type=str2bool, nargs='?', const=True, default=False,
+                        help="use network to predict camera online?")
     parser.add_argument('--ipm_h', type=int, default=208, help='height of inverse projective map (IPM)')
     parser.add_argument('--ipm_w', type=int, default=128, help='width of inverse projective map (IPM)')
     parser.add_argument('--resize_h', type=int, default=360, help='height of the resized image (input of net)')
     parser.add_argument('--resize_w', type=int, default=480, help='width of the resized image (input of net)')
-    parser.add_argument('--y_ref', type=float, default=20.0, help='the reference Y distance in meters from where lane association is determined')
+    parser.add_argument('--y_ref', type=float, default=20.0,
+                        help='the reference Y distance in meters from where lane association is determined')
     parser.add_argument('--prob_th', type=float, default=0.5, help='probability threshold for selecting output lanes')
     parser.add_argument('--encoder', type=str, default='ResNext101', help='feature extractor:'
                                                                           'ResNext101/VGG19/DenseNet161/InceptionV3/MobileNetV2/ResNet101/EfficientNet-Bx')
     parser.add_argument('--feature_channels', type=int, default=128, help='number of channels after encoder')
     parser.add_argument('--num_proj', type=int, default=4, help='number of projection layers')
     parser.add_argument('--num_att', type=int, default=3, help='number of attention encoding layers')
-    parser.add_argument('--use_proj', type=str2bool, nargs='?', const=True, default=True, help='proj features in 2D pathway')
+    parser.add_argument('--use_proj', type=str2bool, nargs='?', const=True, default=True,
+                        help='proj features in 2D pathway')
     parser.add_argument('--use_fpn', type=str2bool, nargs='?', const=True, default=False, help='use FPN features')
-    parser.add_argument('--use_default_anchor', type=str2bool, nargs='?', const=True, default=False, help='use default anchors in 2D and 3D')
-    parser.add_argument('--nms_thres_3d', type=float, default=1.0, help='nms threshold to filter detections in BEV, unit: meter')
-    parser.add_argument('--new_match', type=str2bool, nargs='?', const=True, default=False, help='Allow multiple anchors to match the same GT during 3D data loading')
-    parser.add_argument('--match_dist_thre_3d', type=float, default=2.0, help='Threshold to match an anchor to GT when using new_match, unit: meter')
+    parser.add_argument('--use_default_anchor', type=str2bool, nargs='?', const=True, default=False,
+                        help='use default anchors in 2D and 3D')
+    parser.add_argument('--nms_thres_3d', type=float, default=1.0,
+                        help='nms threshold to filter detections in BEV, unit: meter')
+    parser.add_argument('--new_match', type=str2bool, nargs='?', const=True, default=False,
+                        help='Allow multiple anchors to match the same GT during 3D data loading')
+    parser.add_argument('--match_dist_thre_3d', type=float, default=2.0,
+                        help='Threshold to match an anchor to GT when using new_match, unit: meter')
     # LaneATT settings
     parser.add_argument('--max_lanes', type=int, default=6, help='max lane number detection in LaneATT')
     parser.add_argument('--S', type=int, default=72, help='max sample number in img height')
     parser.add_argument('--anchor_feat_channels', type=int, default=64, help='number of anchor feature channels')
-    parser.add_argument('--cls_loss_weight', type=float, default=1.0, help='cls loss weight w.r.t. reg loss in 2D prediction')
-    parser.add_argument('--reg_vis_loss_weight', type=float, default=1.0, help='reg vis loss weight w.r.t. reg loss in 2D prediction')
+    parser.add_argument('--cls_loss_weight', type=float, default=1.0,
+                        help='cls loss weight w.r.t. reg loss in 2D prediction')
+    parser.add_argument('--reg_vis_loss_weight', type=float, default=1.0,
+                        help='reg vis loss weight w.r.t. reg loss in 2D prediction')
     parser.add_argument('--nms_thres', type=float, default=45.0, help='nms threshold')
     parser.add_argument('--conf_th', type=float, default=0.1, help='confidence threshold for selecting output 2D lanes')
     parser.add_argument('--vis_th', type=float, default=0.1, help='visibility threshold for output 2D lanes')
-    parser.add_argument('--loss_att_weight', type=float, default=100.0, help='2D lane losses weight w.r.t. 3D lane losses')
+    parser.add_argument('--loss_att_weight', type=float, default=100.0,
+                        help='2D lane losses weight w.r.t. 3D lane losses')
     # General model settings
     parser.add_argument('--batch_size', type=int, default=8, help='batch size')
     parser.add_argument('--nepochs', type=int, default=100, help='total numbers of epochs')
     parser.add_argument('--learning_rate', type=float, default=2e-4, help='learning rate')
     parser.add_argument('--no_cuda', action='store_true', help='if gpu available')
     parser.add_argument('--nworkers', type=int, default=0, help='num of threads')
-    parser.add_argument('--seg_start_epoch', type=int, default=1, help='Number of epochs to perform segmentation pretraining')
+    parser.add_argument('--seg_start_epoch', type=int, default=1,
+                        help='Number of epochs to perform segmentation pretraining')
     parser.add_argument('--channels_in', type=int, default=3, help='num channels of input image')
     parser.add_argument('--test_mode', action='store_true', help='prevents loading latest saved model')
     parser.add_argument('--start_epoch', type=int, default=0, help='prevents loading latest saved model')
     parser.add_argument('--evaluate', action='store_true', help='only perform evaluation')
     parser.add_argument('--resume', type=str, default='', help='resume latest saved run')
-    parser.add_argument('--vgg_mean', type=float, default=[0.485, 0.456, 0.406], help='Mean of rgb used in pretrained model on ImageNet')
-    parser.add_argument('--vgg_std', type=float, default=[0.229, 0.224, 0.225], help='Std of rgb used in pretrained model on ImageNet')
+    parser.add_argument('--vgg_mean', type=float, default=[0.485, 0.456, 0.406],
+                        help='Mean of rgb used in pretrained model on ImageNet')
+    parser.add_argument('--vgg_std', type=float, default=[0.229, 0.224, 0.225],
+                        help='Std of rgb used in pretrained model on ImageNet')
     # Optimizer settings
     parser.add_argument('--optimizer', type=str, default='adamw', help='adam/adamw/sgd/rmsprop')
-    parser.add_argument('--weight_init', type=str, default='normal', help='normal, xavier, kaiming, orhtogonal weights initialisation')
+    parser.add_argument('--weight_init', type=str, default='normal',
+                        help='normal, xavier, kaiming, orhtogonal weights initialisation')
     parser.add_argument('--weight_decay', type=float, default=0.01, help='L2 weight decay/regularisation on?')
     parser.add_argument('--lr_decay', action='store_true', help='decay learning rate with rule')
     parser.add_argument('--niter', type=int, default=900, help='# of iter at starting learning rate')
-    parser.add_argument('--niter_decay', type=int, default=400, help='# of iter to linearly decay learning rate to zero')
+    parser.add_argument('--niter_decay', type=int, default=400,
+                        help='# of iter to linearly decay learning rate to zero')
     parser.add_argument('--lr_policy', default=None, help='learning rate policy: lambda|step|cosine|cosine_warm')
     parser.add_argument('--gamma', type=float, default=0.1, help='multiplicative factor of learning rate decay')
-    parser.add_argument('--lr_decay_iters', type=int, default=10, help='multiply by a gamma every lr_decay_iters iterations')
+    parser.add_argument('--lr_decay_iters', type=int, default=10,
+                        help='multiply by a gamma every lr_decay_iters iterations')
     parser.add_argument('--T_max', type=int, default=10, help='maximum number of iterations')
     parser.add_argument('--T_0', type=int, default=500, help='number of iterations for the first restart')
     parser.add_argument('--T_mult', type=int, default=1, help='a factor increases T_i after a restart')
@@ -118,16 +137,17 @@ def define_args():
     # CUDNN usage
     parser.add_argument("--cudnn", type=str2bool, nargs='?', const=True, default=True, help="cudnn optimization active")
     # Tensorboard settings
-    parser.add_argument("--no_tb", type=str2bool, nargs='?', const=True, default=False, help="Use tensorboard logging by tensorflow")
+    parser.add_argument("--no_tb", type=str2bool, nargs='?', const=True, default=False,
+                        help="Use tensorboard logging by tensorflow")
     # Print and Save settings
     parser.add_argument('--print_freq', type=int, default=500, help='padding')
     parser.add_argument('--save_freq', type=int, default=500, help='padding')
     # DDP setting
     parser.add_argument('--distributed', action='store_true')
     parser.add_argument("--local_rank", type=int)
-    parser.add_argument('--gpu', type=int, default = 0)
-    parser.add_argument('--world_size', type=int, default = 1)
-    parser.add_argument('--nodes', type=int, default = 1)
+    parser.add_argument('--gpu', type=int, default=0)
+    parser.add_argument('--world_size', type=int, default=1)
+    parser.add_argument('--nodes', type=int, default=1)
     return parser
 
 
@@ -186,9 +206,9 @@ class Visualizer:
 
         # transformation from ipm to ground region
         H_ipm2g = cv2.getPerspectiveTransform(np.float32([[0, 0],
-                                                          [self.ipm_w-1, 0],
-                                                          [0, self.ipm_h-1],
-                                                          [self.ipm_w-1, self.ipm_h-1]]),
+                                                          [self.ipm_w - 1, 0],
+                                                          [0, self.ipm_h - 1],
+                                                          [self.ipm_w - 1, self.ipm_h - 1]]),
                                               np.float32(args.top_view_region))
         self.H_g2ipm = np.linalg.inv(H_ipm2g)
 
@@ -204,7 +224,7 @@ class Visualizer:
         :param color: [r, g, b] color for line,  each range in [0, 1]
         :return:
         """
-        fig = plt.figure(dpi=120, figsize=(4,3))
+        fig = plt.figure(dpi=120, figsize=(4, 3))
         plt.imshow(img)
         plot_lines = {}
         plot_lines["pred"] = []
@@ -213,7 +233,7 @@ class Visualizer:
         for j in range(lane_anchor.shape[0]):
             # draw laneline
             line_pred = {}
-            lane_cate = np.argmax(lane_anchor[j, self.anchor_dim-self.num_category:self.anchor_dim])
+            lane_cate = np.argmax(lane_anchor[j, self.anchor_dim - self.num_category:self.anchor_dim])
             if draw_type == 'laneline' and lane_cate != 0:
                 x_offsets = lane_anchor[j, :self.num_y_steps]
                 x_3d = x_offsets + self.anchor_x_steps[j]
@@ -222,12 +242,12 @@ class Visualizer:
                     if not self.use_default_anchor:
                         anchor_x_2d, _ = homographic_transformation(P_g2im, self.anchor_x_steps[j], self.anchor_y_steps)
                 else:
-                    z_3d = lane_anchor[j, self.num_y_steps:2*self.num_y_steps]
+                    z_3d = lane_anchor[j, self.num_y_steps:2 * self.num_y_steps]
                     x_2d, y_2d = projective_transformation(P_g2im, x_3d, self.anchor_y_steps, z_3d)
                 visibility = lane_anchor[j, 2 * self.num_y_steps:3 * self.num_y_steps]
                 if not self.use_default_anchor:
                     anchor_x_2d = anchor_x_2d.astype(np.int)
-                
+
                 x_2d = [x for i, x in enumerate(x_2d) if visibility[i] > self.prob_th]
                 y_2d = [y for i, y in enumerate(y_2d) if visibility[i] > self.prob_th]
 
@@ -297,7 +317,7 @@ class Visualizer:
         for j in range(lane_anchor.shape[0]):
             # draw laneline
             line_gt = {}
-            lane_cate = np.argmax(lane_anchor[j, self.anchor_dim-self.num_category:self.anchor_dim])
+            lane_cate = np.argmax(lane_anchor[j, self.anchor_dim - self.num_category:self.anchor_dim])
             if draw_type == 'laneline' and lane_cate != 0:
                 x_offsets = lane_anchor[j, :self.num_y_steps]
                 x_3d = x_offsets + self.anchor_x_steps[j]
@@ -306,16 +326,16 @@ class Visualizer:
                     if not self.use_default_anchor:
                         anchor_x_2d, _ = homographic_transformation(P_g2im, self.anchor_x_steps[j], self.anchor_y_steps)
                 else:
-                    z_3d = lane_anchor[j, self.num_y_steps:2*self.num_y_steps]
+                    z_3d = lane_anchor[j, self.num_y_steps:2 * self.num_y_steps]
                     x_2d, y_2d = projective_transformation(P_g2im, x_3d, self.anchor_y_steps, z_3d)
                 visibility = lane_anchor[j, 2 * self.num_y_steps:3 * self.num_y_steps]
                 if not self.use_default_anchor:
                     anchor_x_2d = anchor_x_2d.astype(np.int)
-                
+
                 x_2d = [x for i, x in enumerate(x_2d) if visibility[i] > self.prob_th]
                 y_2d = [y for i, y in enumerate(y_2d) if visibility[i] > self.prob_th]
 
-                # plt.plot(x_2d, y_2d, 'yellowgreen', lw=2, alpha=0.7)
+                # plt.plot(x_2d, y_2d, 'yellowgreen', lw=1, alpha=0.7)
                 # plt.plot(x_2d, y_2d, 'white', lw=1, alpha=0.5)
 
                 line_gt["x_2d"] = x_2d
@@ -326,10 +346,118 @@ class Visualizer:
         plt.axis('off')
         plt.gca().xaxis.set_major_locator(plt.NullLocator())
         plt.gca().yaxis.set_major_locator(plt.NullLocator())
-        plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-        plt.margins(0,0)
+        plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+        plt.margins(0, 0)
         plt.xlim(0, self.w_net)
-        plt.ylim(self.h_net-1, -1)
+        plt.ylim(self.h_net - 1, -1)
+
+        return fig
+
+    def draw_on_img_category_gt(self, img, pred_anchors, gt_anchors, P_g2im, draw_type='laneline'):
+        """
+        :param img: image in numpy array, each pixel in [0, 1] range
+        :param lane_anchor: lane anchor in N X C numpy ndarray, dimension in agree with dataloader
+        :param P_g2im: projection from ground 3D coordinates to image 2D coordinates
+        :param draw_type: 'laneline' or 'centerline' deciding which to draw
+        :param color: [r, g, b] color for line,  each range in [0, 1]
+        :return:
+        """
+        fig = plt.figure(dpi=120, figsize=(4, 3))
+        plt.imshow(img)
+        plot_lines = {}
+        plot_lines["pred"] = []
+        plot_lines["gt"] = []
+        lane_anchor = gt_anchors
+        for j in range(lane_anchor.shape[0]):
+            # draw laneline
+            line_pred = {}
+            lane_cate = np.argmax(lane_anchor[j, self.anchor_dim - self.num_category:self.anchor_dim])
+            if draw_type == 'laneline' and lane_cate != 0:
+                x_offsets = lane_anchor[j, :self.num_y_steps]
+                x_3d = x_offsets + self.anchor_x_steps[j]
+                if P_g2im.shape[1] == 3:
+                    x_2d, y_2d = homographic_transformation(P_g2im, x_3d, self.anchor_y_steps)
+                    if not self.use_default_anchor:
+                        anchor_x_2d, _ = homographic_transformation(P_g2im, self.anchor_x_steps[j], self.anchor_y_steps)
+                else:
+                    z_3d = lane_anchor[j, self.num_y_steps:2 * self.num_y_steps]
+                    x_2d, y_2d = projective_transformation(P_g2im, x_3d, self.anchor_y_steps, z_3d)
+                visibility = lane_anchor[j, 2 * self.num_y_steps:3 * self.num_y_steps]
+                if not self.use_default_anchor:
+                    anchor_x_2d = anchor_x_2d.astype(np.int)
+
+                x_2d = [x for i, x in enumerate(x_2d) if visibility[i] > self.prob_th]
+                y_2d = [y for i, y in enumerate(y_2d) if visibility[i] > self.prob_th]
+
+                line_pred["x_2d"] = x_2d
+                line_pred["y_2d"] = y_2d
+                line_pred["lane_cate"] = int(lane_cate)
+                plot_lines["pred"].append(line_pred)
+
+                if lane_cate == 1:  # white dash
+                    plt.plot(x_2d, y_2d, 'mediumpurple', lw=3, alpha=0.6)
+                    plt.plot(x_2d, y_2d, 'white', linestyle=(0, (10, 10)), lw=1, alpha=0.5)
+                elif lane_cate == 2:  # white solid
+                    plt.plot(x_2d, y_2d, 'mediumturquoise', lw=3, alpha=0.4)
+                    plt.plot(x_2d, y_2d, 'white', lw=1, alpha=0.5)
+                elif lane_cate == 3:  # double-white-dash
+                    plt.plot(x_2d, y_2d, 'mediumorchid', lw=3, alpha=0.4)
+                    plt.plot(np.array(x_2d) - 3, y_2d, 'white', linestyle=(0, (20, 10)), lw=1, alpha=0.5)
+                    plt.plot(np.array(x_2d) + 3, y_2d, 'white', linestyle=(0, (20, 10)), lw=1, alpha=0.5)
+                elif lane_cate == 4:  # double-white-solid
+                    plt.plot(x_2d, y_2d, 'lightskyblue', lw=3, alpha=0.4)
+                    plt.plot(np.array(x_2d) - 3, y_2d, 'white', lw=1, alpha=0.5)
+                    plt.plot(np.array(x_2d) + 3, y_2d, 'white', lw=1, alpha=0.5)
+                elif lane_cate == 5:  # white-ldash-rsolid
+                    plt.plot(x_2d, y_2d, 'hotpink', lw=3, alpha=0.4)
+                    plt.plot(np.array(x_2d) - 3, y_2d, 'white', linestyle=(0, (20, 10)), lw=1, alpha=0.5)
+                    plt.plot(np.array(x_2d) + 3, y_2d, 'white', lw=1, alpha=0.5)
+                elif lane_cate == 6:  # white-lsolid-rdash
+                    plt.plot(x_2d, y_2d, 'cornflowerblue', lw=3, alpha=0.4)
+                    plt.plot(np.array(x_2d) - 3, y_2d, 'white', lw=0.75, alpha=0.5)
+                    plt.plot(np.array(x_2d) + 3, y_2d, 'white', linestyle=(0, (20, 10)), lw=0.5, alpha=0.5)
+                elif lane_cate == 7:  # yellow-dash
+                    plt.plot(x_2d, y_2d, 'yellowgreen', lw=3, alpha=0.4)
+                    plt.plot(x_2d, y_2d, 'white', linestyle=(0, (20, 10)), lw=1, alpha=0.5)
+                elif lane_cate == 8:  # yellow-solid
+                    plt.plot(x_2d, y_2d, 'dodgerblue', lw=3, alpha=0.4)
+                    plt.plot(x_2d, y_2d, 'white', lw=1, alpha=0.5)
+                elif lane_cate == 9:  # double-yellow-dash
+                    plt.plot(x_2d, y_2d, 'salmon', lw=3, alpha=0.4)
+                    plt.plot(np.array(x_2d) - 3, y_2d, 'white', linestyle=(0, (20, 10)), lw=1, alpha=0.5)
+                    plt.plot(np.array(x_2d) + 3, y_2d, 'white', linestyle=(0, (20, 10)), lw=1, alpha=0.5)
+                elif lane_cate == 10:  # double-yellow-solid
+                    plt.plot(x_2d, y_2d, 'lightcoral', lw=3, alpha=0.6)
+                    plt.plot(np.array(x_2d) - 3, y_2d, 'white', lw=1, alpha=0.5)
+                    plt.plot(np.array(x_2d) + 3, y_2d, 'white', lw=1, alpha=0.5)
+                elif lane_cate == 11:  # yellow-ldash-rsolid
+                    plt.plot(x_2d, y_2d, 'coral', lw=3, alpha=0.4)
+                    plt.plot(np.array(x_2d) - 3, y_2d, 'white', linestyle=(0, (20, 10)), lw=1, alpha=0.5)
+                    plt.plot(np.array(x_2d) + 3, y_2d, 'white', lw=1, alpha=0.5)
+                elif lane_cate == 12:  # yellow-lsolid-rdash
+                    plt.plot(x_2d, y_2d, 'lightseagreen', lw=3, alpha=0.4)
+                    plt.plot(np.array(x_2d) - 3, y_2d, 'white', lw=1, alpha=0.5)
+                    plt.plot(np.array(x_2d) + 3, y_2d, 'white', linestyle=(0, (20, 10)), lw=1, alpha=0.5)
+                elif lane_cate == 13:  # fishbone
+                    plt.plot(x_2d, y_2d, 'royalblue', lw=3, alpha=0.4)
+                    plt.plot(x_2d, y_2d, 'white', lw=1, alpha=0.5)
+                elif lane_cate == 14:  # others
+                    plt.plot(x_2d, y_2d, 'forestgreen', lw=3, alpha=0.4)
+                    plt.plot(x_2d, y_2d, 'white', lw=1, alpha=0.5)
+                elif lane_cate == 20 or lane_cate == 21:  # road
+                    plt.plot(x_2d, y_2d, 'gold', lw=3, alpha=0.3)
+                    plt.plot(x_2d, y_2d, 'white', lw=1, alpha=0.5)
+                else:
+                    plt.plot(x_2d, y_2d, lw=3, alpha=0.4)
+                    plt.plot(x_2d, y_2d, 'white', lw=1, alpha=0.5)
+
+        plt.axis('off')
+        plt.gca().xaxis.set_major_locator(plt.NullLocator())
+        plt.gca().yaxis.set_major_locator(plt.NullLocator())
+        plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+        plt.margins(0, 0)
+        plt.xlim(0, self.w_net)
+        plt.ylim(self.h_net - 1, -1)
 
         return fig
 
@@ -502,7 +630,7 @@ class Visualizer:
                     y_g = np.linspace(min(y_g), max(y_g), 5 * len(y_g))
                     x_g = f_xy(y_g)
                     z_g = f_zy(y_g)
-                    
+
                     if lane_cate == 1: # white dash
                         line1, = ax.plot(x_g, y_g, z_g, 'mediumpurple', lw=3, alpha=0.8, label='pred')
                         ax.plot(x_g, y_g, z_g, 'white', lw=1, alpha=0.8, linestyle=(0,(20,10)))
@@ -630,20 +758,20 @@ class Visualizer:
         if not dataset.data_aug:
             aug_mat = np.repeat(np.expand_dims(aug_mat, axis=0), idx.shape[0], axis=0)
 
-        assert(idx.shape[0] == images.shape[0])
-        assert(idx.shape[0] == gt.shape[0])
-        assert(idx.shape[0] == pred.shape[0])
+        assert (idx.shape[0] == images.shape[0])
+        assert (idx.shape[0] == gt.shape[0])
+        assert (idx.shape[0] == pred.shape[0])
         if not 'openlane' in self.dataset_name:
-            assert(idx.shape[0] == pred_cam_pitch.shape[0])
-            assert(idx.shape[0] == pred_cam_height.shape[0])
+            assert (idx.shape[0] == pred_cam_pitch.shape[0])
+            assert (idx.shape[0] == pred_cam_height.shape[0])
         if laneatt_gt is not None:
             # print("laneatt_gt size: ", len(laneatt_gt))
-            assert(idx.shape[0] == len(laneatt_gt))
+            assert (idx.shape[0] == len(laneatt_gt))
         if laneatt_pred is not None:
             # print("laneatt_pred size: ", len(laneatt_pred))
-            assert(idx.shape[0] == len(laneatt_pred))
+            assert (idx.shape[0] == len(laneatt_pred))
         if laneatt_pos_anchor is not None:
-            assert(idx.shape[0] == len(laneatt_pos_anchor))
+            assert (idx.shape[0] == len(laneatt_pos_anchor))
 
         for i in range(idx.shape[0]):
             # during training, only visualize the first sample of this batch
@@ -664,11 +792,11 @@ class Visualizer:
             # apply nms to avoid output directly neighbored lanes
             # consider w/o centerline cases
             if self.use_default_anchor:
-                for j in range(1, self.num_category+1):
+                for j in range(1, self.num_category + 1):
                     pred_anchors[:, self.anchor_dim - j] = nms_1d(pred_anchors[:, self.anchor_dim - j])
                     if not self.no_centerline:
-                        pred_anchors[:, 2*self.anchor_dim - j] = nms_1d(pred_anchors[:, 2*self.anchor_dim - j])
-                        pred_anchors[:, 3*self.anchor_dim - j] = nms_1d(pred_anchors[:, 3*self.anchor_dim - j])
+                        pred_anchors[:, 2 * self.anchor_dim - j] = nms_1d(pred_anchors[:, 2 * self.anchor_dim - j])
+                        pred_anchors[:, 3 * self.anchor_dim - j] = nms_1d(pred_anchors[:, 3 * self.anchor_dim - j])
 
             H_g2im, P_g2im, H_crop, H_im2ipm = dataset.transform_mats(idx[i])
             P_gt = np.matmul(H_crop, H_g2im)
@@ -690,14 +818,19 @@ class Visualizer:
 
             im_laneline = im.copy()
             fig = self.draw_on_img_category(im_laneline, pred_anchors, gt_anchors, P_gt, 'laneline')
+            fig_gt = self.draw_on_img_category_gt(im_laneline, pred_anchors, gt_anchors, P_gt, 'laneline')
             ipm_laneline = im_ipm.copy()
             fig2 = self.draw_on_ipm_category(ipm_laneline, pred_anchors, gt_anchors, 'laneline')
-            fig3 = self.draw_3d_curves_category(pred_anchors, gt_anchors, extrinsics[i][2,3], 'laneline')
+            fig3 = self.draw_3d_curves_category(pred_anchors, gt_anchors, extrinsics[i][2, 3], 'laneline')
 
             if evaluate:
                 filename = self.save_path + '/vis_2d/' + '{}'.format(img_name[i])
                 mkdir_if_missing(os.path.dirname(filename))
                 fig.savefig(filename)
+
+                filename = self.save_path + '/vis_gt/' + '{}'.format(img_name[i])
+                mkdir_if_missing(os.path.dirname(filename))
+                fig_gt.savefig(filename)
 
                 filename = self.save_path + '/vis_ipm/' + '{}'.format(img_name[i])
                 mkdir_if_missing(os.path.dirname(filename))
@@ -709,8 +842,8 @@ class Visualizer:
                 # fig3.savefig(filename[:-4]+'.svg', bbox_inches='tight')
             else:
                 filename = self.save_path + '/example/{}/epoch-{}/segment-{}_{}'.format(train_or_val, epoch,
-                                                                                             seg_name_i if seg_name is not None else "segment",
-                                                                                             img_name[i])
+                                                                                        seg_name_i if seg_name is not None else "segment",
+                                                                                        img_name[i])
                 mkdir_if_missing(os.path.dirname(filename))
                 fig.savefig(filename)
             plt.clf()
@@ -748,10 +881,10 @@ def resample_laneline_in_y(input_lane, y_steps, out_vis=False):
     """
 
     # at least two points are included
-    assert(input_lane.shape[0] >= 2)
+    assert (input_lane.shape[0] >= 2)
 
-    y_min = np.min(input_lane[:, 1])-5
-    y_max = np.max(input_lane[:, 1])+5
+    y_min = np.min(input_lane[:, 1]) - 5
+    y_max = np.max(input_lane[:, 1]) + 5
 
     if input_lane.shape[1] < 3:
         input_lane = np.concatenate([input_lane, np.zeros([input_lane.shape[0], 1], dtype=np.float32)], axis=1)
@@ -779,7 +912,7 @@ def resample_laneline_in_y_with_vis(input_lane, y_steps, vis_vec):
     """
 
     # at least two points are included
-    assert(input_lane.shape[0] >= 2)
+    assert (input_lane.shape[0] >= 2)
 
     if input_lane.shape[1] < 3:
         input_lane = np.concatenate([input_lane, np.zeros([input_lane.shape[0], 1], dtype=np.float32)], axis=1)
@@ -858,9 +991,9 @@ def homograpthy_g2im(cam_pitch, cam_height, K):
 
 
 def projection_g2im(cam_pitch, cam_height, K):
-    P_g2c = np.array([[1,                             0,                              0,          0],
+    P_g2c = np.array([[1, 0, 0, 0],
                       [0, np.cos(np.pi / 2 + cam_pitch), -np.sin(np.pi / 2 + cam_pitch), cam_height],
-                      [0, np.sin(np.pi / 2 + cam_pitch),  np.cos(np.pi / 2 + cam_pitch),          0]])
+                      [0, np.sin(np.pi / 2 + cam_pitch), np.cos(np.pi / 2 + cam_pitch), 0]])
     P_g2im = np.matmul(K, P_g2c)
     return P_g2im
 
@@ -868,7 +1001,7 @@ def projection_g2im(cam_pitch, cam_height, K):
 def homograpthy_g2im_extrinsic(E, K):
     """E: extrinsic matrix, 4*4"""
     E_inv = np.linalg.inv(E)[0:3, :]
-    H_g2c = E_inv[:, [0,1,3]]
+    H_g2c = E_inv[:, [0, 1, 3]]
     H_g2im = np.matmul(K, H_g2c)
     return H_g2im
 
@@ -891,7 +1024,7 @@ def homography_crop_resize(org_img_size, crop_y, resize_img_size):
     ratio_x = resize_img_size[1] / org_img_size[1]
     ratio_y = resize_img_size[0] / (org_img_size[0] - crop_y)
     H_c = np.array([[ratio_x, 0, 0],
-                    [0, ratio_y, -ratio_y*crop_y],
+                    [0, ratio_y, -ratio_y * crop_y],
                     [0, 0, 1]])
     return H_c
 
@@ -909,8 +1042,8 @@ def homographic_transformation(Matrix, x, y):
     coordinates = np.vstack((x, y, ones))
     trans = np.matmul(Matrix, coordinates)
 
-    x_vals = trans[0, :]/trans[2, :]
-    y_vals = trans[1, :]/trans[2, :]
+    x_vals = trans[0, :] / trans[2, :]
+    y_vals = trans[1, :] / trans[2, :]
     return x_vals, y_vals
 
 
@@ -928,8 +1061,8 @@ def projective_transformation(Matrix, x, y, z):
     coordinates = np.vstack((x, y, z, ones))
     trans = np.matmul(Matrix, coordinates)
 
-    x_vals = trans[0, :]/trans[2, :]
-    y_vals = trans[1, :]/trans[2, :]
+    x_vals = trans[0, :] / trans[2, :]
+    y_vals = trans[1, :] / trans[2, :]
     return x_vals, y_vals
 
 
@@ -982,9 +1115,10 @@ def nms_1d(v):
     for i in range(len):
         if i != 0 and v[i - 1] > v[i]:
             v_out[i] = 0.
-        elif i != len-1 and v[i+1] > v[i]:
+        elif i != len - 1 and v[i + 1] > v[i]:
             v_out[i] = 0.
     return v_out
+
 
 def nms_bev(batch_output_net, args):
     """apply nms to filter predictions of same GT from different anchors"""
@@ -993,16 +1127,16 @@ def nms_bev(batch_output_net, args):
     if args.no_3d:
         anchor_dim = args.num_y_steps + args.num_category
     else:
-        anchor_dim = 3*args.num_y_steps + args.num_category
+        anchor_dim = 3 * args.num_y_steps + args.num_category
     anchor_x_steps = args.anchor_grid_x \
         if not args.use_default_anchor \
-        else np.linspace(args.top_view_region[0, 0], args.top_view_region[1, 0], np.int(args.ipm_w/8))
+        else np.linspace(args.top_view_region[0, 0], args.top_view_region[1, 0], np.int(args.ipm_w / 8))
 
     batch_output_net = batch_output_net.reshape(batch_output_net.shape[0], batch_output_net.shape[1], anchor_dim)
     # print("cate before softmax: ", batch_output_net[:, :, anchor_dim-args.num_category:].shape)
     # print(batch_output_net[0, :16, :])
-    batch_output_net[:, :, anchor_dim-args.num_category:] = \
-        softmax(batch_output_net[:, :, anchor_dim-args.num_category:], axis=2)
+    batch_output_net[:, :, anchor_dim - args.num_category:] = \
+        softmax(batch_output_net[:, :, anchor_dim - args.num_category:], axis=2)
     # print("cate after softmax: ", batch_output_net[:, :, anchor_dim-args.num_category:].shape)
     # print(batch_output_net[0, :16, :])
     for i, output_net in enumerate(batch_output_net):
@@ -1013,23 +1147,23 @@ def nms_bev(batch_output_net, args):
         valid_count = 0
         for j, output_anchor in enumerate(output_net):
             # print("max cate id: ", np.argmax(output_anchor[anchor_dim-args.num_category:]))
-            visible_yid = np.where(output_anchor[2*args.num_y_steps: 3*args.num_y_steps] > args.prob_th)[0]
+            visible_yid = np.where(output_anchor[2 * args.num_y_steps: 3 * args.num_y_steps] > args.prob_th)[0]
             # print("vis points: ", len(visible_yid))
-            if np.argmax(output_anchor[anchor_dim-args.num_category:]) == \
-                anchor_dim-args.num_category or len(visible_yid) < 2:
+            if np.argmax(output_anchor[anchor_dim - args.num_category:]) == \
+                    anchor_dim - args.num_category or len(visible_yid) < 2:
                 # print("skip")
                 continue
             pre_nms_valid_anchor_id.append(j)
-            
-            scores[valid_count] = np.max(output_anchor[anchor_dim-args.num_category+1:]).item()
+
+            scores[valid_count] = np.max(output_anchor[anchor_dim - args.num_category + 1:]).item()
             yid_start = visible_yid[0]
             # approximation here, since there can be invisible points in between
             yid_num = visible_yid[-1] - visible_yid[0] + 1
-            output_net_nms[valid_count, 2] = (yid_start / (args.S-1)).item()
+            output_net_nms[valid_count, 2] = (yid_start / (args.S - 1)).item()
             output_net_nms[valid_count, 4] = yid_num.item()
-            output_net_nms[valid_count, 5 : 5+args.num_y_steps] = \
+            output_net_nms[valid_count, 5: 5 + args.num_y_steps] = \
                 torch.from_numpy(output_anchor[:args.num_y_steps] + anchor_x_steps[j])
-            
+
             valid_count = valid_count + 1
         scores = scores[:valid_count]
         output_net_nms = output_net_nms[:valid_count]
@@ -1042,19 +1176,20 @@ def nms_bev(batch_output_net, args):
         for jj, anchor_id in enumerate(pre_nms_valid_anchor_id):
             if jj not in keep:
                 # update category as invalid, so that it can be filted in compute_3d_lanes()
-                batch_output_net[i][anchor_id][anchor_dim-args.num_category] = 1.0
+                batch_output_net[i][anchor_id][anchor_dim - args.num_category] = 1.0
 
     return batch_output_net
 
+
 def first_run(save_path):
-    txt_file = os.path.join(save_path,'first_run.txt')
+    txt_file = os.path.join(save_path, 'first_run.txt')
     if not os.path.exists(txt_file):
         open(txt_file, 'w').close()
     else:
         saved_epoch = open(txt_file).read()
         if saved_epoch is None:
             print('You forgot to delete [first run file]')
-            return '' 
+            return ''
         return saved_epoch
     return ''
 
@@ -1082,6 +1217,7 @@ class Logger(object):
     """
     Source https://github.com/Cysu/open-reid/blob/master/reid/utils/logging.py.
     """
+
     def __init__(self, fpath=None):
         self.console = sys.stdout
         self.file = None
@@ -1285,6 +1421,7 @@ def unit_update_projection_extrinsic(args, extrinsics, intrinsics):
         M_inv = M_inv.cuda()
     return M_inv
 
+
 def unit_update_projection(args, cam_height, cam_pitch, intrinsics=None, extrinsics=None):
     """
         Unit function to Update transformation matrix based on ground-truth cam_height and cam_pitch
@@ -1307,6 +1444,7 @@ def unit_update_projection(args, cam_height, cam_pitch, intrinsics=None, extrins
     cam_pitch = cam_pitch
     return M_inv, cam_height, cam_pitch
 
+
 def unit_update_projection_for_data_aug(args, aug_mats, _M_inv, _S_im_inv=None, _S_im=None):
     """
         Unit function to update transformation matrix when data augmentation have been applied, and the image augmentation matrix are provided
@@ -1320,7 +1458,7 @@ def unit_update_projection_for_data_aug(args, aug_mats, _M_inv, _S_im_inv=None, 
         _S_im_inv = torch.from_numpy(np.array([[1/np.float(args.resize_w),                         0, 0],
                                                     [                        0, 1/np.float(args.resize_h), 0],
                                                     [                        0,                         0, 1]], dtype=np.float32)).cuda()
-    
+
     if _S_im is None:
         _S_im = torch.from_numpy(np.array([[args.resize_w,              0, 0],
                                                 [            0,  args.resize_h, 0],

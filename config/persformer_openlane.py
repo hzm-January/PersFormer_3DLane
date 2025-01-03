@@ -21,25 +21,29 @@ import os.path as ops
 def config(args):
     args.model_name = 'PersFormer'
     # 300 sequence
-    # args.dataset_name = 'openlane'
-    # args.dataset_dir = '/mnt/disk01/openlane/images/'
-    # args.data_dir = '/mnt/disk01/openlane/lane3d_300/'
+    args.dataset_name = 'openlane'
+    args.dataset_dir = '/root/autodl-tmp/dataset/lane_det_3d/images/'
+    args.data_dir = '/root/autodl-tmp/dataset/lane_det_3d/lane3d_300/'
+    args.save_prefix = '/root/autodl-tmp/output/persformer'
 
     # 1000 sequence
-    args.dataset_name = 'openlane'
-    args.dataset_dir = '/mnt/disk01/openlane/images/'
-    args.data_dir = '/mnt/disk01/openlane/lane3d_1000/'
+    # args.dataset_name = 'openlane'
+    # args.dataset_dir = '/root/autodl-tmp/dataset/lane_det_3d/images/'
+    # args.data_dir = '/root/autodl-tmp/dataset/lane_det_3d/lane3d_1000/'
 
     if 'openlane' in args.dataset_name:
         openlane_config(args)
     else:
         sim3d_config(args)
 
-    args.save_prefix = ops.join(os.getcwd(), 'data_splits')
+    # args.save_prefix = ops.join(os.getcwd(), 'data_splits')
     args.save_path = ops.join(args.save_prefix, args.dataset_name)
 
     # for the case only running evaluation
-    args.evaluate = False
+    # args.evaluate = False
+    # args.evaluate_case = False
+
+    args.evaluate = True
     args.evaluate_case = False
 
     # settings for save and visualize
@@ -56,6 +60,7 @@ def config(args):
     # Define the network model
     # change encoder, "EfficientNet-B7"
     args.encoder = "EfficientNet-B7"
+    # args.encoder = "EfficientNet-B7"
 
     # init
     # args.weight_init = 'xavier'
