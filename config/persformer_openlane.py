@@ -30,9 +30,9 @@ def config(args):
     # args.dataset_dir = '/mnt/disk01/openlane/images/'
     # args.data_dir = '/mnt/disk01/openlane/lane3d_1000/'
 
-    args.dataset_dir = '/root/autodl-tmp/dataset/lane_det_3d/images'
+    args.dataset_dir = '/root/autodl-tmp/dataset/openlane/images'
     # args.data_dir = '/root/autodl-tmp/dataset/lane_det_3d/lane3d_1000/'
-    args.data_dir = '/root/autodl-tmp/dataset/lane_det_3d/lane3d_300/'
+    args.data_dir = '/root/autodl-tmp/dataset/openlane/lane3d_300/'
 
     if 'openlane' in args.dataset_name:
         openlane_config(args)
@@ -40,11 +40,16 @@ def config(args):
         sim3d_config(args)
 
     # args.save_prefix = ops.join(os.getcwd(), 'data_splits')
-    args.save_prefix = '/root/autodl-tmp/output/persformer/resnet50'
+    # args.save_prefix = '/root/autodl-tmp/output/persformer/eff7b'
     # args.save_prefix = '/root/autodl-tmp/output/persformer/resnet18'
+    # args.save_prefix = '/root/autodl-tmp/output/persformer/resnet50'
+    args.save_prefix = '/root/autodl-tmp/output/persformer/360_480'
 
     # '/root/autodl-tmp/output/persformer/resnet50/openlane/PersFormer/persformer_resnet50_720x960_model_best_epoch_3.pth.tar'
-    args.test_model = 'persformer_resnet50_720x960_model_best_epoch_3.pth.tar'
+    # args.test_model = 'persformer_resnet50_720x960_model_best_epoch_3.pth.tar'
+    # args.test_model = 'model_best_epoch_1.pth.tar'
+    # args.test_model = 'persformer_resnet50_720x960_model_best_epoch_3.pth.tar'
+    args.test_model = 'persformer_guanfang_360_480_r50.pth.tar'
 
     args.save_path = ops.join(args.save_prefix, args.dataset_name)
 
@@ -67,9 +72,9 @@ def config(args):
 
     # Define the network model
     # change encoder, "EfficientNet-B7"
-    # args.encoder = "EfficientNet-B7"
+    args.encoder = "EfficientNet-B7"
     # args.encoder = "ResNet101"
-    args.encoder = "ResNet50"
+    # args.encoder = "ResNet50"
     # args.encoder = "ResNet18"
 
     # init
