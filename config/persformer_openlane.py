@@ -40,11 +40,14 @@ def config(args):
         sim3d_config(args)
 
     # args.save_prefix = ops.join(os.getcwd(), 'data_splits')
-    args.save_prefix = '/root/autodl-tmp/output/persformer/resnet50'
+    # args.save_prefix = '/root/autodl-tmp/output/persformer/resnet50'
     # args.save_prefix = '/root/autodl-tmp/output/persformer/resnet18'
+    args.save_prefix = '/root/autodl-tmp/output/persformer/eff7b'
 
     # '/root/autodl-tmp/output/persformer/resnet50/openlane/PersFormer/persformer_resnet50_720x960_model_best_epoch_3.pth.tar'
-    args.test_model = 'persformer_resnet50_720x960_model_best_epoch_3.pth.tar'
+    # args.test_model = 'persformer_resnet50_720x960_model_best_epoch_3.pth.tar'
+    # args.test_model = 'persformer_resnet18_720_960_model_best_epoch.pth.tar'
+    args.test_model = 'persformer_eff7b_720_960_model_best_epoch.pth.tar'
 
     args.save_path = ops.join(args.save_prefix, args.dataset_name)
 
@@ -67,9 +70,9 @@ def config(args):
 
     # Define the network model
     # change encoder, "EfficientNet-B7"
-    # args.encoder = "EfficientNet-B7"
+    args.encoder = "EfficientNet-B7"
     # args.encoder = "ResNet101"
-    args.encoder = "ResNet50"
+    # args.encoder = "ResNet50"
     # args.encoder = "ResNet18"
 
     # init
